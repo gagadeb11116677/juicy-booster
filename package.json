@@ -1,0 +1,22 @@
+{
+  "name": "juicy-booster",
+  "version": "0.4.0",
+  "description": "Juicy Booster - Windows performance booster. Portable, no install. HTML + CSS + Node.js zero-dependency.",
+  "type": "module",
+  "private": true,
+  "main": "index.js",
+  "bin": "index.js",
+  "scripts": {
+    "dev": "bun --hot index.js",
+    "start": "node index.js"
+  },
+  "pkg": {
+    "assets": [
+      "public/**/*"
+    ],
+    "targets": [
+      "node20-win-x64"
+    ],
+    "outputPath": "dist"
+  }
+}

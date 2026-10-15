@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>Juicy Booster v0.4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?XTransformPort=3003" />
+  <link rel="icon" href="logo.png?XTransformPort=3003" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <img src="logo.png?XTransformPort=3003" alt="Juicy Booster" class="logo" />
+        <div class="brand-text">
+          <h1>Juicy Booster</h1>
+          <p class="sub">Windows Performance Booster &middot; v0.4</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="host-pill" id="hostPill">menghubungkan</div>
+        <button class="btn btn-ghost btn-sm" id="themeToggle" title="Ganti tema" aria-label="Ganti tema">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="btn btn-danger-outline btn-sm" id="resetBtn" title="Kembalikan semua ke default">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          Reset
+        </button>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="hero">
+        <div class="hero-score">
+          <div class="gauge" id="scoreGauge">
+            <svg viewBox="0 0 120 120" class="gauge-svg">
+              <circle class="gauge-track" cx="60" cy="60" r="52" />
+              <circle class="gauge-value" id="gaugeCircle" cx="60" cy="60" r="52" />
+            </svg>
+            <div class="gauge-center">
+              <span class="gauge-num" id="scoreNum">--</span>
+              <span class="gauge-label">SKOR</span>
+            </div>
+          </div>
+          <div class="hero-status">
+            <div class="status-badge" id="statusBadge">
+              <span class="dot"></span> <span id="statusText">menunggu data</span>
+            </div>
+            <h2 id="heroTitle">Siap di-boost</h2>
+            <p id="heroDesc">Klik tombol Boost untuk membersihkan junk, membebaskan RAM, dan mengoptimasi jaringan dalam satu klik.</p>
+            <button class="btn btn-boost" id="boostBtn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              BOOST SEKARANG
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="metrics" id="metricsGrid">
+        <div class="metric">
+          <div class="metric-head"><span class="metric-label">CPU</span><span class="metric-val" id="mCpu">--</span></div>
+          <div class="bar"><div class="bar-fill" id="barCpu"></div></div>
+          <div class="metric-foot" id="footCpu">-</div>
+        </div>
+        <div class="metric">
+          <div class="metric-head"><span class="metric-label">RAM</span><span class="metric-val" id="mRam">--</span></div>
+          <div class="bar"><div class="bar-fill" id="barRam"></div></div>
+          <div class="metric-foot" id="footRam">-</div>
+        </div>
+        <div class="metric">
+          <div class="metric-head"><span class="metric-label">DISK</span><span class="metric-val" id="mDisk">--</span></div>
+          <div class="bar"><div class="bar-fill" id="barDisk"></div></div>
+          <div class="metric-foot" id="footDisk">-</div>
+        </div>
+        <div class="metric">
+          <div class="metric-head"><span class="metric-label">GPU</span><span class="metric-val" id="mGpu">--</span></div>
+          <div class="bar"><div class="bar-fill" id="barGpu"></div></div>
+          <div class="metric-foot" id="footGpu">-</div>
+        </div>
+        <div class="metric">
+          <div class="metric-head"><span class="metric-label">SUHU</span><span class="metric-val" id="mTemp">--</span></div>
+          <div class="bar"><div class="bar-fill" id="barTemp"></div></div>
+          <div class="metric-foot" id="footTemp">-</div>
+        </div>
+        <div class="metric">
+          <div class="metric-head"><span class="metric-label">JARINGAN</span><span class="metric-val" id="mNet">--</span></div>
+          <div class="bar"><div class="bar-fill" id="barNet" style="width:40%"></div></div>
+          <div class="metric-foot" id="footNet">-</div>
+        </div>
+      </section>
+
+      <nav class="tabs" id="tabNav">
+        <button class="tab active" data-tab="processes">Proses Latar</button>
+        <button class="tab" data-tab="clean">Bersihkan Junk</button>
+        <button class="tab" data-tab="mode">Mode Performa</button>
+        <button class="tab" data-tab="startup">Startup</button>
+        <button class="tab" data-tab="system">Sistem</button>
+        <button class="tab" data-tab="diagnostics">Diagnostik</button>
+        <button class="tab" data-tab="history">Riwayat</button>
+      </nav>
+
+      <section class="panels">
+        <div class="panel active" id="panel-processes">
+          <div class="panel-head">
+            <h3>Proses Latar</h3>
+            <button class="btn btn-ghost btn-sm" id="refreshProc">Muat ulang</button>
+          </div>
+          <p class="panel-desc">Proses yang paling banyak mengonsumsi CPU dan RAM. Matikan yang tidak penting untuk membebaskan resource.</p>
+          <div class="table-wrap table-wrap-scroll">
+            <table class="table">
+              <thead>
+                <tr><th>PID</th><th>Nama</th><th>CPU %</th><th>RAM (MB)</th><th>Aksi</th></tr>
+              </thead>
+              <tbody id="procBody">
+                <tr><td colspan="5" class="empty">Memuat...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-clean">
+          <div class="panel-head"><h3>Bersihkan Junk</h3></div>
+          <p class="panel-desc">Hapus file sampah yang menumpuk. Aman, tidak menyentuh file user.</p>
+          <div class="clean-grid" id="cleanGrid"></div>
+          <button class="btn btn-boost btn-block" id="cleanAllBtn">BERSIHKAN SEMUA</button>
+        </div>
+
+        <div class="panel" id="panel-mode">
+          <div class="panel-head"><h3>Mode Performa</h3></div>
+          <p class="panel-desc">Pilih mode sesuai kebutuhan. Bisa dikembalikan ke Seimbang kapan saja.</p>
+          <div class="mode-grid" id="modeGrid"></div>
+        </div>
+
+        <div class="panel" id="panel-startup">
+          <div class="panel-head">
+            <h3>Item Startup</h3>
+            <button class="btn btn-ghost btn-sm" id="refreshStartup">Muat ulang</button>
+          </div>
+          <p class="panel-desc">Program yang berjalan otomatis saat Windows boot. Kurangi untuk mempercepat boot.</p>
+          <div class="table-wrap table-wrap-scroll">
+            <table class="table">
+              <thead><tr><th>Nama</th><th>Lokasi</th><th>User</th><th>Command</th></tr></thead>
+              <tbody id="startupBody"><tr><td colspan="4" class="empty">Memuat...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-system">
+          <div class="panel-head"><h3>Informasi Sistem</h3></div>
+          <p class="panel-desc">Spesifikasi lengkap komputer Anda.</p>
+          <div class="sys-grid" id="sysGrid">Memuat...</div>
+          <h4 class="subsection">Disk Drives</h4>
+          <div class="drives" id="drivesList">Memuat...</div>
+          <h4 class="subsection">Baterai</h4>
+          <div id="batteryInfo">Memuat...</div>
+          <h4 class="subsection">Network Interfaces</h4>
+          <div id="netList">Memuat...</div>
+        </div>
+
+        <div class="panel" id="panel-diagnostics">
+          <div class="panel-head">
+            <h3>Diagnostik Sistem</h3>
+            <button class="btn btn-ghost btn-sm" id="refreshDiag">Muat ulang</button>
+          </div>
+          <p class="panel-desc">Pemeriksaan kemampuan tiap subsistem. Jika ada yang gagal, fitur terkait akan fallback aman.</p>
+          <div id="diagGrid" class="diag-grid">Memuat...</div>
+        </div>
+
+        <div class="panel" id="panel-history">
+          <div class="panel-head"><h3>Riwayat Optimasi</h3></div>
+          <p class="panel-desc">Log semua aksi boost, bersihkan, kill, dan ganti mode yang sudah Anda lakukan.</p>
+          <div class="history-list" id="historyList"><p class="empty">Belum ada aktivitas.</p></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-left">
+        <span>Juicy Booster v0.4</span>
+        <span class="sep">&middot;</span>
+        <span>portable, no install</span>
+      </div>
+      <div class="footer-right">
+        <span id="uptime">uptime -</span>
+        <span class="sep">&middot;</span>
+        <span id="boostCount">0x boost</span>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="overlay" id="boostOverlay">
+    <div class="overlay-box">
+      <div class="overlay-spinner"></div>
+      <h3 id="overlayTitle">Boosting...</h3>
+      <ul class="overlay-stages" id="overlayStages"></ul>
+      <p class="overlay-foot" id="overlayFoot"></p>
+    </div>
+  </div>
+
+  <div class="modal" id="resetModal">
+    <div class="modal-box">
+      <h3>Reset ke Default</h3>
+      <p id="resetMsg">Mengembalikan semua setting ke kondisi awal Windows. Aman, tidak akan merusak apa pun.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="resetCancel">Batal</button>
+        <button class="btn btn-danger" id="resetConfirm">Ya, Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?XTransformPort=3003"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+name: Build and Release EXE
+
+on:
+  push:
+    tags:
+      - 'v*' # Robot jalan otomatis saat kamu beri stempel versi v0.3, v0.4, dst.
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js Environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Compile to Single EXE
+      run: |
+        node --experimental-sea-config sea-config.json
+        node -e "require('fs').copyFileSync(process.execPath, 'juicy-booster.exe')"
+        npx postject juicy-booster.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680d4447228a7dcca36ce7d02d789
+
+    - name: Upload EXE Directly to Release Page
+      uses: softprops/action-gh-release@v2
+      with:
+        files: juicy-booster.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,12 +1,13 @@
 {
-  "main": "index.js",
-  "output": "juicy-sea-prep.blob",
+  "main": "dist/bundle.cjs",
+  "output": "sea-prep.blob",
   "disableExperimentalSEAWarning": true,
   "useSnapshot": false,
-  "useCodeCache": true,
+  "useCodeCache": false,
   "assets": {
     "public/index.html": "public/index.html",
     "public/style.css": "public/style.css",
-    "public/app.js": "public/app.js"
+    "public/app.js": "public/app.js",
+    "public/logo.png": "public/logo.png"
   }
 }

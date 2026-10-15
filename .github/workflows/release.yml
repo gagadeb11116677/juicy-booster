@@ -1,6 +1,7 @@
 name: Build and Release EXE v0.4
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'v*'
@@ -8,6 +9,8 @@ on:
 jobs:
   build-and-release:
     runs-on: windows-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout Source Code
@@ -18,16 +21,17 @@ jobs:
       with:
         node-version: 20
 
-    - name: Install Dependencies
-      run: npm install
-
     - name: Compile to Single EXE
+      shell: bash
       run: |
+        # SEA cuma support CommonJS, jadi bundle dulu ESM -> CJS
+        npx --yes esbuild index.js --bundle --platform=node --format=cjs --define:import.meta.url='"file:///sea"' --outfile=dist/bundle.cjs
         node --experimental-sea-config sea-config.json
         node -e "require('fs').copyFileSync(process.execPath, 'juicy-booster.exe')"
-        npx postject juicy-booster.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680d4447228a7dcca36ce7d02d789
+        npx --yes postject juicy-booster.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680d4447228a7dcca36ce7d02d789
 
     - name: Upload EXE Directly to Release Page
+      if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v2
       with:
         files: juicy-booster.exe

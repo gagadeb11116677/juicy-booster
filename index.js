@@ -10,6 +10,7 @@ import os from "node:os";
 import crypto from "node:crypto";
 import { exec, execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import sea from "node:sea";
 import { sysinfo, formatBytes } from "./lib/sysinfo.js";
 import { listProcesses, killProcess } from "./lib/processes.js";
 import {
@@ -30,7 +31,11 @@ import {
   getNetworkInterfaces,
 } from "./lib/system.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const IS_SEA = sea.isSea();
+// Di mode .exe (SEA) import.meta.url tidak tersedia, jadi pakai lokasi exe.
+const __dirname = IS_SEA
+  ? path.dirname(process.execPath)
+  : path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3003;
 const HOST = "127.0.0.1"; // bind loopback only — tidak expose ke jaringan
 const PUBLIC_DIR = path.join(__dirname, "public");
@@ -95,7 +100,19 @@ function serveStatic(req, res) {
     res.end("Forbidden");
     return;
   }
-  fs.readFile(filePath, (err, data) => {
+  const readAsset = (cb) => {
+    if (IS_SEA) {
+      try {
+        const key = "public/" + safe.replace(/\\/g, "/").replace(/^\/+/, "");
+        cb(null, Buffer.from(sea.getAsset(key)));
+      } catch (e) {
+        cb(e);
+      }
+    } else {
+      fs.readFile(filePath, cb);
+    }
+  };
+  readAsset((err, data) => {
     if (err) {
       res.writeHead(404, { "Content-Type": "text/plain" });
       res.end("Not found");
@@ -343,4 +360,3 @@ server.listen(PORT, HOST, () => {
     }
   }
 });
-

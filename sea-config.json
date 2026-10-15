@@ -1,0 +1,16 @@
+{
+  "main": "dist/bundle.cjs",
+  "output": "juicy-sea-prep.blob",
+  "disableExperimentalSEAWarning": true,
+  "useSnapshot": false,
+  "useCodeCache": false,
+  "assets": {
+    "public/index.html": "public/index.html",
+    "public/style.css": "public/style.css",
+    "public/app.js": "public/app.js",
+    "public/manifest.webmanifest": "public/manifest.webmanifest",
+    "public/favicon.ico": "public/favicon.ico",
+    "public/icon-192.png": "public/icon-192.png",
+    "public/icon-512.png": "public/icon-512.png"
+  }
+}

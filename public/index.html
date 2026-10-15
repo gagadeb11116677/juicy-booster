@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+  <title>Juicy Booster</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="favicon.ico" />
+  <link rel="manifest" href="manifest.webmanifest" />
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="nav-item active" data-page="ringkasan">Ringkasan</div>
+      <div class="nav-item" data-page="proses">Proses</div>
+      <div class="nav-item" data-page="pembersih">Pembersih</div>
+      <div class="nav-item" data-page="startup">Startup</div>
+      <div class="nav-item" data-page="disk">Disk</div>
+      <div class="nav-item" data-page="jaringan">Jaringan</div>
+      <div class="nav-item" data-page="kesehatan">Kesehatan</div>
+      <div class="nav-item" data-page="daya">Daya</div>
+      <div class="nav-item" data-page="pengaturan">Pengaturan</div>
+    </nav>
+    <main class="content">
+      <section class="page active" id="page-ringkasan">
+        <div class="metrics-row">
+          <div class="metric"><span class="m-label">CPU</span><span class="m-value" id="m-cpu">--</span><div class="m-bar"><div class="m-bar-fill" id="bar-cpu"></div></div></div>
+          <div class="metric"><span class="m-label">RAM</span><span class="m-value" id="m-ram">--</span><div class="m-bar"><div class="m-bar-fill" id="bar-ram"></div></div></div>
+          <div class="metric"><span class="m-label">Disk</span><span class="m-value" id="m-disk">--</span><div class="m-bar"><div class="m-bar-fill" id="bar-disk"></div></div></div>
+          <div class="metric"><span class="m-label">GPU</span><span class="m-value" id="m-gpu">--</span></div>
+          <div class="metric"><span class="m-label">Suhu</span><span class="m-value" id="m-temp">--</span></div>
+          <div class="metric"><span class="m-label">Jaringan</span><span class="m-value" id="m-net">--</span></div>
+        </div>
+        <div class="charts">
+          <div class="chart-box"><span class="chart-label">CPU (%)</span><canvas id="chart-cpu" width="400" height="80"></canvas></div>
+          <div class="chart-box"><span class="chart-label">RAM (%)</span><canvas id="chart-ram" width="400" height="80"></canvas></div>
+        </div>
+        <div class="quick-actions">
+          <button class="btn" id="btn-scan-junk">Pindai sampah</button>
+          <button class="btn" id="btn-flush-dns">Flush DNS</button>
+        </div>
+        <div class="top-procs">
+          <span class="section-title">Proses teratas</span>
+          <table class="table compact">
+            <thead><tr><th>Nama</th><th>PID</th><th>CPU</th><th>Memori</th></tr></thead>
+            <tbody id="top-procs-body"></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="page" id="page-proses">
+        <div class="page-head">
+          <input type="search" class="search" id="proc-search" placeholder="Cari proses..." />
+          <button class="btn" id="btn-end-proc" disabled>Akhiri proses</button>
+        </div>
+        <table class="table compact">
+          <thead><tr><th>Nama</th><th>PID</th><th>CPU</th><th>Memori</th><th>Path</th></tr></thead>
+          <tbody id="proc-body"></tbody>
+        </table>
+      </section>
+      <section class="page" id="page-pembersih">
+        <div class="page-head">
+          <button class="btn" id="btn-scan">Pindai</button>
+          <button class="btn btn-primary" id="btn-clean" disabled>Bersihkan</button>
+        </div>
+        <div id="junk-list"></div>
+        <div id="junk-result"></div>
+      </section>
+      <section class="page" id="page-startup">
+        <table class="table compact">
+          <thead><tr><th>Nama</th><th>Lokasi</th><th>Status</th></tr></thead>
+          <tbody id="startup-body"></tbody>
+        </table>
+      </section>
+      <section class="page" id="page-disk">
+        <div id="drives-list"></div>
+      </section>
+      <section class="page" id="page-jaringan">
+        <div id="net-list"></div>
+        <button class="btn" id="btn-flush-dns2">Flush DNS</button>
+      </section>
+      <section class="page" id="page-kesehatan">
+        <div id="battery-info"></div>
+      </section>
+      <section class="page" id="page-daya">
+        <div id="power-modes"></div>
+      </section>
+      <section class="page" id="page-pengaturan">
+        <div class="settings-list" id="settings-list"></div>
+        <div class="about-box">
+          <p>Juicy Booster v<span id="ver">--</span></p>
+          <p>xobe development</p>
+          <button class="btn" id="btn-copy-sys">Salin ringkasan sistem</button>
+        </div>
+      </section>
+    </main>
+    <footer class="statusbar">
+      <span id="sb-cpu">CPU --</span>
+      <span id="sb-ram">RAM --</span>
+      <span id="sb-disk">Disk --</span>
+      <span id="sb-admin"></span>
+    </footer>
+  </div>
+  <dialog id="confirm-dialog">
+    <form method="dialog">
+      <p id="confirm-msg"></p>
+      <menu class="dialog-actions">
+        <button value="cancel" class="btn" autofocus>Batal</button>
+        <button value="ok" class="btn btn-danger" id="confirm-ok">OK</button>
+      </menu>
+    </form>
+  </dialog>
+  <script src="app.js"></script>
+</body>
+</html>

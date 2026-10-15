@@ -1,0 +1,129 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          check-latest: true
+
+      - name: Install tools
+        run: |
+          npm install -g esbuild
+          npm install postject@1.0.0-alpha.6 --no-save
+
+      - name: Run tests
+        run: node --test
+
+      - name: Verify sea-config.json exists
+        run: |
+          if [ ! -f sea-config.json ]; then
+            echo "ERROR: sea-config.json tidak ditemukan"
+            exit 1
+          fi
+          cat sea-config.json
+
+      - name: Bundle ESM to CJS
+        run: |
+          mkdir -p dist
+          npx esbuild index.js --bundle --platform=node --format=cjs --define:import.meta.url='"file:///sea"' --outfile=dist/bundle.cjs
+
+      - name: Verify bundle exists
+        run: |
+          if [ ! -f dist/bundle.cjs ]; then
+            echo "ERROR: dist/bundle.cjs tidak terbentuk"
+            exit 1
+          fi
+          ls -lh dist/bundle.cjs
+
+      - name: Generate SEA blob
+        run: node --experimental-sea-config sea-config.json
+
+      - name: Verify blob exists
+        run: |
+          if [ ! -f juicy-sea-prep.blob ]; then
+            echo "ERROR: juicy-sea-prep.blob tidak terbentuk"
+            exit 1
+          fi
+          ls -lh juicy-sea-prep.blob
+
+      - name: Copy node.exe to juicy-booster.exe
+        run: |
+          cp "/c/Program Files/nodejs/node.exe" juicy-booster.exe
+          ls -lh juicy-booster.exe
+
+      - name: Verify exe exists before postject
+        run: |
+          if [ ! -f juicy-booster.exe ]; then
+            echo "ERROR: juicy-booster.exe tidak ada setelah copy"
+            exit 1
+          fi
+
+      - name: Inject SEA blob with postject
+        run: |
+          npx postject juicy-booster.exe NODE_SEA_BLOB juicy-sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+
+      - name: Verify exe exists after postject
+        run: |
+          if [ ! -f juicy-booster.exe ]; then
+            echo "ERROR: juicy-booster.exe hilang setelah postject"
+            exit 1
+          fi
+          ls -lh juicy-booster.exe
+
+      - name: Set subsystem GUI
+        run: node scripts/set-subsystem-gui.mjs juicy-booster.exe
+
+      - name: Verify exe exists after subsystem
+        run: |
+          if [ ! -f juicy-booster.exe ]; then
+            echo "ERROR: juicy-booster.exe hilang setelah set-subsystem-gui"
+            exit 1
+          fi
+          ls -lh juicy-booster.exe
+
+      - name: Smoke test
+        run: |
+          JUICY_NO_WINDOW=1 JUICY_NO_OPEN=1 ./juicy-booster.exe &
+          PROC_ID=$!
+          sleep 8
+          curl -s http://127.0.0.1:3003/api/health || (echo "Server tidak merespons" && exit 1)
+          curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3003/ | grep -q 200 || exit 1
+          kill $PROC_ID 2>/dev/null || true
+          sleep 2
+
+      - name: Generate SHA256
+        run: |
+          sha256sum juicy-booster.exe > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Upload release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            juicy-booster.exe
+            SHA256SUMS.txt
+
+      - name: Upload artifact
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: juicy-booster-exe
+          path: juicy-booster.exe

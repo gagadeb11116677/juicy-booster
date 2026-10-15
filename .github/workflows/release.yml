@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install esbuild
+        run: npm install -g esbuild
+
+      - name: Run tests
+        run: node --test
+
+      - name: Generate SEA config
+        run: node scripts/gen-sea-config.mjs
+
+      - name: Bundle ESM to CJS
+        run: npx esbuild index.js --bundle --platform=node --format=cjs --define:import.meta.url='"file:///sea"' --outfile=dist/bundle.cjs
+
+      - name: Generate SEA blob
+        run: node --experimental-sea-config sea-config.json
+
+      - name: Copy node.exe
+        run: copy "C:\Program Files\nodejs\node.exe" juicy-booster.exe
+
+      - name: Inject SEA blob
+        run: npx postject juicy-booster.exe NODE_SEA_BLOB juicy-sea-prep.blob --sentinel NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+
+      - name: Set subsystem GUI
+        run: node scripts/set-subsystem-gui.mjs
+
+      - name: Smoke test
+        run: |
+          $proc = Start-Process -FilePath ".\juicy-booster.exe" -PassThru -Environment @{"JUICY_NO_WINDOW"="1";"JUICY_NO_OPEN"="1"}
+          Start-Sleep -Seconds 5
+          $health = Invoke-WebRequest -Uri "http://127.0.0.1:3003/api/health" -UseBasicParsing
+          if ($health.StatusCode -ne 200) { exit 1 }
+          Stop-Process -Id $proc.Id -Force
+
+      - name: Generate SHA256
+        run: |
+          $hash = Get-FileHash juicy-booster.exe -Algorithm SHA256
+          "$($hash.Hash)  juicy-booster.exe" | Out-File -Encoding ASCII SHA256SUMS.txt
+
+      - name: Upload release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            juicy-booster.exe
+            SHA256SUMS.txt
+
+      - name: Upload artifact
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: juicy-booster-exe
+          path: juicy-booster.exe

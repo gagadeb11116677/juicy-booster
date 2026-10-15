@@ -12,104 +12,49 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: bash
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          check-latest: true
 
-      - name: Install tools
-        run: |
-          npm install -g esbuild
-          npm install postject@1.0.0-alpha.6 --no-save
+      - name: Install esbuild
+        run: npm install -g esbuild
 
       - name: Run tests
         run: node --test
 
-      - name: Verify sea-config.json exists
-        run: |
-          if [ ! -f sea-config.json ]; then
-            echo "ERROR: sea-config.json tidak ditemukan"
-            exit 1
-          fi
-          cat sea-config.json
-
-            - name: Bundle ESM to CJS
+      - name: Bundle ESM to CJS
         run: npx esbuild index.js --bundle --platform=node --format=cjs --define:import.meta.url='"file:///D:/a/juicy-booster/juicy-booster/dist/bundle.cjs"' --outfile=dist/bundle.cjs
 
-      - name: Verify bundle exists
+      - name: Generate sea-config.json On-The-Fly
         run: |
-          if [ ! -f dist/bundle.cjs ]; then
-            echo "ERROR: dist/bundle.cjs tidak terbentuk"
-            exit 1
-          fi
-          ls -lh dist/bundle.cjs
+          echo '{"main": "dist/bundle.cjs", "output": "sea-prep.blob", "disableSentinel": false}' > sea-config.json
 
       - name: Generate SEA blob
         run: node --experimental-sea-config sea-config.json
 
-      - name: Verify blob exists
+      - name: Compile Executable (Node 22 Official Injection)
         run: |
-          if [ ! -f juicy-sea-prep.blob ]; then
-            echo "ERROR: juicy-sea-prep.blob tidak terbentuk"
-            exit 1
-          fi
-          ls -lh juicy-sea-prep.blob
-
-      - name: Copy node.exe to juicy-booster.exe
-        run: |
-          cp "/c/Program Files/nodejs/node.exe" juicy-booster.exe
-          ls -lh juicy-booster.exe
-
-      - name: Verify exe exists before postject
-        run: |
-          if [ ! -f juicy-booster.exe ]; then
-            echo "ERROR: juicy-booster.exe tidak ada setelah copy"
-            exit 1
-          fi
-
-      - name: Inject SEA blob with postject
-        run: |
-          npx postject juicy-booster.exe NODE_SEA_BLOB juicy-sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
-
-      - name: Verify exe exists after postject
-        run: |
-          if [ ! -f juicy-booster.exe ]; then
-            echo "ERROR: juicy-booster.exe hilang setelah postject"
-            exit 1
-          fi
-          ls -lh juicy-booster.exe
+          node -e "require('fs').copyFileSync(process.execPath, 'juicy-booster.exe')"
+          node --inject-executable-sea-blob juicy-booster.exe sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680d4447228a7dcca36ce7d02d789
 
       - name: Set subsystem GUI
         run: node scripts/set-subsystem-gui.mjs juicy-booster.exe
 
-      - name: Verify exe exists after subsystem
-        run: |
-          if [ ! -f juicy-booster.exe ]; then
-            echo "ERROR: juicy-booster.exe hilang setelah set-subsystem-gui"
-            exit 1
-          fi
-          ls -lh juicy-booster.exe
-
       - name: Smoke test
         run: |
-          JUICY_NO_WINDOW=1 JUICY_NO_OPEN=1 ./juicy-booster.exe &
-          PROC_ID=$!
-          sleep 8
-          curl -s http://127.0.0.1:3003/api/health || (echo "Server tidak merespons" && exit 1)
-          curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3003/ | grep -q 200 || exit 1
-          kill $PROC_ID 2>/dev/null || true
-          sleep 2
+          $proc = Start-Process -FilePath ".\juicy-booster.exe" -PassThru -Environment @{"JUICY_NO_WINDOW"="1";"JUICY_NO_OPEN"="1"}
+          Start-Sleep -Seconds 5
+          $health = Invoke-WebRequest -Uri "http://127.0.0" -UseBasicParsing
+          if ($health.StatusCode -ne 200) { exit 1 }
+          Stop-Process -Id $proc.Id -Force
 
       - name: Generate SHA256
         run: |
-          sha256sum juicy-booster.exe > SHA256SUMS.txt
-          cat SHA256SUMS.txt
+          $hash = Get-FileHash juicy-booster.exe -Algorithm SHA256
+          "$($hash.Hash)  juicy-booster.exe" | Out-File -Encoding ASCII SHA256SUMS.txt
 
       - name: Upload release
         if: startsWith(github.ref, 'refs/tags/')

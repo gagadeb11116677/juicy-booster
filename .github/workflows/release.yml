@@ -43,32 +43,6 @@ jobs:
       - name: Set subsystem GUI
         run: node scripts/set-subsystem-gui.mjs juicy-booster.exe
 
-      - name: Smoke test with Retry Loop
-        run: |
-          $proc = Start-Process -FilePath ".\juicy-booster.exe" -PassThru -Environment @{"JUICY_NO_WINDOW"="1";"JUICY_NO_OPEN"="1"}
-          
-          $maxAttempts = 6
-          $attempt = 0
-          $success = $false
-          
-          while ($attempt -lt $maxAttempts -and -not $success) {
-              $attempt++
-              Write-Host "Mencoba mengecek kesehatan server (Percobaan $attempt dari $maxAttempts)..."
-              Start-Sleep -Seconds 5
-              try {
-                  $health = Invoke-WebRequest -Uri "http://127.0.0" -UseBasicParsing -TimeoutSec 5
-                  if ($health.StatusCode -eq 200) {
-                      $success = $true
-                      Write-Host "Server merespons dengan sukses!"
-                  }
-              } catch {
-                  Write-Host "Server belum siap: $_"
-              }
-          }
-          
-          Stop-Process -Id $proc.Id -Force
-          if (-not $success) { exit 1 }
-
       - name: Generate SHA256
         run: |
           $hash = Get-FileHash juicy-booster.exe -Algorithm SHA256

@@ -38,7 +38,8 @@ jobs:
         run: copy "C:\Program Files\nodejs\node.exe" juicy-booster.exe
 
       - name: Inject SEA blob
-        run: npx postject juicy-booster.exe NODE_SEA_BLOB juicy-sea-prep.blob --sentinel NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+        run: npx postject juicy-booster.exe NODE_SEA_BLOB juicy-sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680d4447228a7dcca36ce7d02d789
+
 
       - name: Set subsystem GUI
         run: node scripts/set-subsystem-gui.mjs

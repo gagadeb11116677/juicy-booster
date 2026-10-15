@@ -1,3 +1,4 @@
+
 # Juicy Booster (v0.4.0)
 
 Juicy Booster adalah aplikasi berbasis Node.js yang dirancang untuk melakukan optimasi sistem, manajemen proses latar belakang, dan pembersihan sampah sistem guna meningkatkan performa PC Windows Anda.
@@ -129,3 +130,6 @@ MIT License
 ---
 
 Juicy Booster v0.4 — by xobe development
+=======
+# juicy-booster
+>>>>>>> 42f848acfb09e7da5e25041a073d1a77ef49a151

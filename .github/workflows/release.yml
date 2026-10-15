@@ -31,13 +31,9 @@ jobs:
       - name: Bundle ESM to CJS
         run: npx esbuild index.js --bundle --platform=node --format=cjs --define:import.meta.url='"file:///sea"' --outfile=dist/bundle.cjs
 
-      - name: Generate SEA blob
-        run: node --experimental-sea-config sea-config.json
-
-      - name: Generate Executable and Inject Blob
+      - name: Generate Executable and Inject Blob (Native Node 22)
         run: |
-          node -e "require('fs').copyFileSync(process.execPath, 'juicy-booster.exe')"
-          npx postject juicy-booster.exe NODE_SEA_BLOB juicy-sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680d4447228a7dcca36ce7d02d789
+          node --experimental-sea-config sea-config.json
 
       - name: Set subsystem GUI
         run: node scripts/set-subsystem-gui.mjs
@@ -46,7 +42,7 @@ jobs:
         run: |
           $proc = Start-Process -FilePath ".\juicy-booster.exe" -PassThru -Environment @{"JUICY_NO_WINDOW"="1";"JUICY_NO_OPEN"="1"}
           Start-Sleep -Seconds 5
-          $health = Invoke-WebRequest -Uri "http://127.0.0.1:3003/api/health" -UseBasicParsing
+          $health = Invoke-WebRequest -Uri "http://127.0.0" -UseBasicParsing
           if ($health.StatusCode -ne 200) { exit 1 }
           Stop-Process -Id $proc.Id -Force
 

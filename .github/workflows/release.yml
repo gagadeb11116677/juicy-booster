@@ -1,9 +1,9 @@
-name: Build and Release EXE
+name: Build and Release EXE v0.4
 
 on:
   push:
     tags:
-      - 'v*' # Robot jalan otomatis saat kamu beri stempel versi v0.3, v0.4, dst.
+      - 'v*'
 
 jobs:
   build-and-release:

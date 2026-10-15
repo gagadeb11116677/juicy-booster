@@ -28,7 +28,7 @@ jobs:
         npx --yes esbuild index.js --bundle --platform=node --format=cjs --define:import.meta.url='"file:///sea"' --outfile=dist/bundle.cjs
         node --experimental-sea-config sea-config.json
         node -e "require('fs').copyFileSync(process.execPath, 'juicy-booster.exe')"
-        npx --yes postject juicy-booster.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680d4447228a7dcca36ce7d02d789
+        npx --yes postject juicy-booster.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
 
     - name: Upload EXE Directly to Release Page
       if: startsWith(github.ref, 'refs/tags/')

@@ -34,12 +34,10 @@ jobs:
       - name: Generate SEA blob
         run: node --experimental-sea-config sea-config.json
 
-      - name: Copy node.exe
-        run: copy "C:\Program Files\nodejs\node.exe" juicy-booster.exe
-
-      - name: Inject SEA blob
-        run: npx postject juicy-booster.exe NODE_SEA_BLOB juicy-sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680d4447228a7dcca36ce7d02d789
-
+      - name: Generate Executable and Inject Blob
+        run: |
+          node -e "require('fs').copyFileSync(process.execPath, 'juicy-booster.exe')"
+          npx postject juicy-booster.exe NODE_SEA_BLOB juicy-sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680d4447228a7dcca36ce7d02d789
 
       - name: Set subsystem GUI
         run: node scripts/set-subsystem-gui.mjs
